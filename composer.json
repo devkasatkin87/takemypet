@@ -1,0 +1,19 @@
+{
+    "name": "kasatkin/takemypet",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Kasatkin Sergey",
+            "email": "devkasatkin87@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/routing": "^4.2",
+        "symfony/http-foundation": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "application\\src\\": "src/"
+        }
+    }
+}
