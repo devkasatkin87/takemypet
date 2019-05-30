@@ -6,7 +6,7 @@ ini_set('display_startup_errors', 1);
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-use src\App\App;
+use src\System\App;
 
 $app = App::getAppInstance();
 $app->run();

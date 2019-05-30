@@ -1,0 +1,7 @@
+site_index:
+  path: /
+  controller: src\Controllers\SiteController::actionIndex
+
+articles_index:
+  path: /articles/{number}
+  controller: src\Controllers\ArticlesController::actionIndex
