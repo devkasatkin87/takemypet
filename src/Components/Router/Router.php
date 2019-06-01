@@ -9,21 +9,23 @@ use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpKernel\EventListener\RouterListener;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Defines and implements the routing mechanism
  * @package src\Components\Router
  * @var Symfony\Component\HttpFoundation\Request $request
  * @var Symfony\Component\HttpFoundation\Response $response
- * @var Router $router
- * @var Symfony\Component\Routing\RequestContext $requestContext
- * @var Symfony\Component\HttpKernel\Controller\ControllerResolver $controller
- * @var Symfony\Component\HttpKernel\Controller\ArgumentResolver $arguments
+ * @var Symfony\Component\Routing\RouteCollection $route
+ * @var Symfony\Component\EventDispatcher\EventDispatcher $dispatcher;
  * @var string $basePath
- * @var  $routerInstance
+ * @var src\Components\Router $routerInstance
  *  
  */
 class Router
@@ -31,23 +33,19 @@ class Router
 
     private $request;
     private $response;
-    //private $router;
     private $routes;
-    private $requestContext;
-    private $controller;
-    private $arguments;
     private $basePath;
+    private $dispatcher;
 
     public static $routerInstance = null;
 
     /**
      * Helper methods are invoked in the constructor to enable execution of the method mechanism $this->run()
+     * @param string $basePath Base path of Application
      */
     private function __construct(string $basePath)
     {
         $this->setRequest();
-        $this->setRequestContext();
-        // $this->setRouter();
         $this->setRoutes();
 
         $this->basePath = $basePath;
@@ -66,54 +64,52 @@ class Router
         return self::$routerInstance;
     }
 
+    /**
+     * Realize the routing mechanism
+     * @return bool
+     */
+    public function run() : bool
+    {
+        try {
+            $matcher = new UrlMatcher($this->routes, new RequestContext());
+
+            $this->setDispatcher($matcher);
+
+            $controllerResolver = new ControllerResolver();
+            $argumentResolver = new ArgumentResolver();
+
+            $kernel = new HttpKernel($this->dispatcher, $controllerResolver, new RequestStack(), $argumentResolver);
+
+            $this->response = $kernel->handle($this->request);
+            
+        } catch (NotFoundHttpException $exeption){
+            $this->response = new Response("Page not found", 404);
+        } catch (\Exception $e){
+            $this->response = new Response("An occured error", 500);
+        } 
+        $this->response->send();
+
+        $kernel->terminate($this->request, $this->response);
+        return true;
+    }
+
+    /**
+     * @param Symfony\Component\Routing\Matcher\UrlMatcher $matcher route match result
+     */
+    public function setDispatcher($matcher)
+    {
+        $this->dispatcher = new EventDispatcher();
+        $this->dispatcher->addSubscriber(new RouterListener($matcher, new RequestStack()));
+    }
+
     private function setRequest()
     {
         $this->request = Request::createFromGlobals();
     }
 
-    private function setRequestContext()
-    {
-        $this->requestContext = new RequestContext();
-        $this->requestContext->fromRequest($this->request);
-    }
-
     private function setRoutes()
     {
         $this->routes = $this->getRoutesCollection();
-    }
-
-    private function getController()
-    {
-        return (new ControllerResolver())->getController($this->request);
-    }
-
-    private function getArguments($controller)
-    {
-        return (new ArgumentResolver())->getArguments($this->request, $this->controller);
-    }
-
-    /**
-     * Realize the routing mechanism
-     * @return bool
-     */
-    public function run()
-    {
-        $matcher = new UrlMatcher($this->routes, $this->requestContext);
-        try {
-            $this->request->attributes->add($matcher->match($this->request->getPathInfo()));
-            
-            $this->controller = $this->getController();
-            $this->arguments = $this->getArguments($this->controller);
-
-            $this->response = call_user_func_array($this->controller, $this->arguments);
-            //dd($response);
-        } 
-        catch(Exception $e) {
-            print_r($e->getMessageError());
-        }
-
-            $this->response->send();
-            return true;
     }
 
     /**
