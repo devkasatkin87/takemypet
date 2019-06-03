@@ -4,10 +4,10 @@ namespace src\Controllers;
 
 use Symfony\Component\HttpFoundation\Response;
 
-class SiteController
+class SiteController extends Controller
 {
     public function actionIndex()
     {
-        return new Response("<h3>Hello world!</h3><br>");
+        return $this->render('');
     }
 }
