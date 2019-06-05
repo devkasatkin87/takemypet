@@ -39,7 +39,7 @@ class App
      */
     public function run()
     {
-        $router = Router::getRouterInstance(__DIR__);
+        $router = Router::getRouterInstance(__ROOT__);
         $router->run();
     }
 
