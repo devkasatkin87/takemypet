@@ -1,0 +1,6 @@
+database:
+  dbname: "database_name"
+  user: "dbuser"
+  password: "root"
+  host: "localhost:8080"
+  driver: "pdo_mysql"

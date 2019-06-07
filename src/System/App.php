@@ -3,6 +3,7 @@
 namespace src\System;
 
 use src\Components\Router\Router;
+use src\Components\Config\Config;
 
 /**
  * This class difines an entrypoint in application. 
@@ -16,6 +17,7 @@ class App
      * @property App $appInstance  Instance of Application
      */
     private static $appInstance;
+    public static $config;
 
     /**
      * This method has private type of access and undefined.
@@ -34,11 +36,27 @@ class App
         return self::$appInstance;
     }
 
+
     /**
-     * This method starts the application. It resolves controllers and actions.  
+     * Load config file
+     * @param string $directory
+     * @param string $filename
+     */
+    private function loadConfig(string $directory, string $filename){
+
+        self::$config = new Config($directory);
+        self::$config->addConfig($filename);
+    }
+
+    /**
+     * This method starts the application. It resolves controllers and actions.
+     * This method load config files
      */
     public function run()
     {
+        $configDirectory = 'src/Config';
+        $configFilename = 'database.yaml';
+        $this->loadConfig($configDirectory, $configFilename );
         $router = Router::getRouterInstance(__ROOT__);
         $router->run();
     }

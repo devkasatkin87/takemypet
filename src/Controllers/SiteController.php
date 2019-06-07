@@ -3,6 +3,7 @@
 namespace src\Controllers;
 
 use Symfony\Component\HttpFoundation\Response;
+use src\System\App;
 
 class SiteController extends Controller
 {
