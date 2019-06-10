@@ -7,21 +7,29 @@ use Symfony\Component\Config\FileLocator;
 
 class Config implements iConfig
 {
+    /**
+     * @var array $config includes array of configuration data
+     * @var src\Components\Config\Interfaces\iConfigLoader $loader includes type of configuration file loader
+     * @var Symfony\Component\Config\FileLocator $locator The locator receives a collection of locations where it should look for files
+     */
     private $config = [];
     private $loader;
     private $locator;
 
-    public function __construct($dir)
+    public function __construct(string $dir,string $loaderType)
     {
         $directories = [
             __ROOT__.'/'.$dir
         ];
 
         $this->setLocator($directories);
-        $this->setLoader();
+        $this->setLoader($loaderType);
     }
 
-
+    /**
+     * Adds data in array of configuration
+     * @param string $file Name of file with configuration data
+     */
     public function addConfig($file)
     {
         $configValues = $this->loader->load($this->locator->locate($file));
@@ -32,7 +40,12 @@ class Config implements iConfig
         }
     }
 
-    //database.keyvalue
+    /**
+     * Gets configuration data for a given key
+     * @param string $keyvalue Parameter for finding the configuration. It should be "key.value"
+     * @return mixed Returns array of configuration if $keyvalue is defined like "key"
+     * or string of configuration if $keyvalue is defined like "key.value"
+     */
     public function get($keyvalue)
     {
         $pattern = "/[a-zA-z]*\.[a-zA-z]*/";
@@ -51,11 +64,10 @@ class Config implements iConfig
         if ($key && isset($this->config[$key])){
 
             if ($value && isset($this->config[$key][$value])){
-
+                
                 return $this->config[$key][$value];
 
             }else {
-                
                 return $this->config[$key];
             }
         }
@@ -63,17 +75,17 @@ class Config implements iConfig
         return null;
     }
 
-    public function getConfig()
+    private function getConfig()
     {
         return $this->config;
     }
 
-    public function setLoader()
+    private function setLoader($className)
     {
-        $this->loader = new YamlConfigLoader($this->locator);
+        $this->loader = new $className($this->locator);
     }
 
-    public function setLocator($dir)
+    private function setLocator($dir)
     {
         $this->locator = new FileLocator($dir);
     }

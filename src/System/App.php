@@ -38,13 +38,13 @@ class App
 
 
     /**
-     * Load config file
+     * Load config files
      * @param string $directory
      * @param string $filename
      */
     private function loadConfig(string $directory, string $filename){
 
-        self::$config = new Config($directory);
+        self::$config = new Config($directory, 'src\Components\Config\YamlConfigLoader');
         self::$config->addConfig($filename);
     }
 
@@ -56,7 +56,7 @@ class App
     {
         $configDirectory = 'src/Config';
         $configFilename = 'database.yaml';
-        $this->loadConfig($configDirectory, $configFilename );
+        $this->loadConfig($configDirectory, $configFilename);
         $router = Router::getRouterInstance(__ROOT__);
         $router->run();
     }
