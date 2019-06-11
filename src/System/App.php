@@ -4,6 +4,7 @@ namespace src\System;
 
 use src\Components\Router\Router;
 use src\Components\Config\Config;
+use src\Components\Locator;
 
 /**
  * This class difines an entrypoint in application. 
@@ -42,8 +43,8 @@ class App
      * @param string $directory
      * @param string $filename
      */
-    private function loadConfig(string $directory, string $filename){
-
+    private function loadConfig(string $directory, string $filename)
+    {
         self::$config = new Config($directory, 'src\Components\Config\YamlConfigLoader');
         self::$config->addConfig($filename);
     }

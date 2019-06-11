@@ -3,6 +3,7 @@
 namespace src\Components\Config;
 
 use src\Components\Config\Interfaces\iConfig;
+use src\Components\Locator;
 use Symfony\Component\Config\FileLocator;
 
 class Config implements iConfig
@@ -21,8 +22,8 @@ class Config implements iConfig
         $directories = [
             __ROOT__.'/'.$dir
         ];
-
         $this->setLocator($directories);
+
         $this->setLoader($loaderType);
     }
 
@@ -85,7 +86,7 @@ class Config implements iConfig
         $this->loader = new $className($this->locator);
     }
 
-    private function setLocator($dir)
+    public function setLocator($dir)
     {
         $this->locator = new FileLocator($dir);
     }
