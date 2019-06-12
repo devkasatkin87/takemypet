@@ -1,0 +1,16 @@
+parameters:
+    router.basepath: src
+    config.dir: src/Config
+    config.loaderType: src\Components\Config\YamlConfigLoader
+    config.filename: database.yaml
+services:
+    router:
+        class: src\Components\Router\Router
+        arguments: ['%router.basepath%']
+        calls: 
+            - [run]
+    config:
+        class: src\Components\Config\Config
+        arguments: ['%config.dir%', '%config.loaderType%']
+        calls: 
+            - [addConfig, ['%config.filename%']]

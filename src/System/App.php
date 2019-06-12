@@ -2,8 +2,9 @@
 
 namespace src\System;
 
-use src\Components\Router\Router;
-use src\Components\Config\Config;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\Config\FileLocator;
 
 /**
  * This class difines an entrypoint in application. 
@@ -18,6 +19,7 @@ class App
      */
     private static $appInstance;
     public static $config;
+    private static $container;
 
     /**
      * This method has private type of access and undefined.
@@ -36,29 +38,41 @@ class App
         return self::$appInstance;
     }
 
-
     /**
-     * Load config files
-     * @param string $directory
-     * @param string $filename
+     * Defines the DI container and load yaml files with classes and it's configuration
      */
-    private function loadConfig(string $directory, string $filename){
+    public static function setContainer()
+    {
+        try {
 
-        self::$config = new Config($directory, 'src\Components\Config\YamlConfigLoader');
-        self::$config->addConfig($filename);
+        self::$container = new ContainerBuilder();
+        $loader = new YamlFileLoader(self::$container, new FileLocator(__DIR__.'/Config/'));
+        $loader->load('services.yaml');
+
+        return self::$container;
+
+        } catch (Exception $e){
+            
+            print_r($e->getMessage());
+        }
     }
 
     /**
-     * This method starts the application. It resolves controllers and actions.
-     * This method load config files
+     * @return Symfony\Component\DependencyInjection\ContainerBuilder;
+     */
+    public static function getContainer()
+    {
+        return self::$container;
+    }
+
+    /**
+     * This method starts the application. It set and load data in DI container.
+     * This method load config files and start routing.
      */
     public function run()
     {
-        $configDirectory = 'src/Config';
-        $configFilename = 'database.yaml';
-        $this->loadConfig($configDirectory, $configFilename);
-        $router = Router::getRouterInstance(__ROOT__);
-        $router->run();
+        $container = self::setContainer();
+        $container->get('router')->run();
     }
 
 
