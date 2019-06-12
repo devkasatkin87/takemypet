@@ -43,7 +43,7 @@ class Router
      * Helper methods are invoked in the constructor to enable execution of the method mechanism $this->run()
      * @param string $basePath Base path of Application
      */
-    private function __construct(string $basePath)
+    public function __construct(string $basePath)
     {
         $this->setRequest();
         $this->setRoutes();
@@ -121,5 +121,10 @@ class Router
         $fileLocator = new FileLocator([__DIR__.'/Config/']);
         $loader = new YamlFileLoader($fileLocator);
         return $loader->load('routes.yaml');
+    }
+
+    public function test()
+    {
+        echo "test message\n";
     }
 }
